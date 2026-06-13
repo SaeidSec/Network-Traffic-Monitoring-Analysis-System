@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Network Traffic Analyzer</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Network Traffic Analyzer</h1>
+
+    <section class="summary-grid">
+        <article class="summary-card"><h2>Total Packets</h2><p id="total-packets">0</p></article>
+        <article class="summary-card"><h2>Total Bytes</h2><p id="total-bytes">0</p></article>
+        <article class="summary-card"><h2>Average Packet Size</h2><p id="avg-packet-length">0</p></article>
+        <article class="summary-card"><h2>Detected Anomalies</h2><p id="anomaly-sources">0</p></article>
+    </section>
+
+    <section class="panel-grid">
+        <article class="panel-card">
+            <h2>Top Sources</h2>
+            <table id="top-sources-table">
+                <thead><tr><th>IP Address</th><th>Packets</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </article>
+
+        <article class="panel-card">
+            <h2>Top Destinations</h2>
+            <table id="top-destinations-table">
+                <thead><tr><th>IP Address</th><th>Packets</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </article>
+
+        <article class="panel-card">
+            <h2>Protocols</h2>
+            <table id="protocol-table">
+                <thead><tr><th>Protocol</th><th>Count</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </article>
+
+        <article class="panel-card">
+            <h2>Top Ports</h2>
+            <table id="port-table">
+                <thead><tr><th>Port</th><th>Hits</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </article>
+    </section>
+
+    <script type="text/javascript">
+        function renderTable(tableId, entries) {
+            var rows = '';
+            $.each(entries, function(key, value) {
+                rows += '<tr><td>' + key + '</td><td>' + value + '</td></tr>';
+            });
+            $('#' + tableId + ' tbody').html(rows || '<tr><td colspan="2">No data yet</td></tr>');
+        }
+
+        function updateStats() {
+            $.getJSON('/stats', function(data) {
+                $('#total-packets').text(data.total_packets || 0);
+                $('#total-bytes').text(data.total_bytes || 0);
+                $('#avg-packet-length').text(data.average_packet_length || 0);
+                $('#anomaly-sources').text((data.anomaly_sources || []).length);
+
+                renderTable('top-sources-table', data.top_sources || {});
+                renderTable('top-destinations-table', data.top_destinations || {});
+                renderTable('protocol-table', data.protocol_counts || {});
+                renderTable('port-table', data.port_counts || {});
+            });
+        }
+
+        updateStats();
+        setInterval(updateStats, 1000);
+    </script>
+</body>
+</html>
