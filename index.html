@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Network Traffic Analyzer</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Network Traffic Analyzer</h1>
+    <table id="traffic-stats">
+        <thead>
+            <tr>
+                <th>IP Address</th>
+                <th>Packet Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be populated here by jQuery -->
+        </tbody>
+    </table>
+
+    <script type="text/javascript">
+        function updateStats() {
+            $.getJSON('/stats', function(data) {
+                var rows = '';
+                $.each(data, function(ip, count) {
+                    rows += '<tr><td>' + ip + '</td><td>' + count + '</td></tr>';
+                });
+                $('#traffic-stats tbody').html(rows);
+            });
+        }
+
+        setInterval(updateStats, 1000);
+    </script>
+</body>
+</html>
